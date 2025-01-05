@@ -1,6 +1,6 @@
 # i2c-lcd pico 
 A simple library for managing character LCD's over the I2C bus on a Raspberry Pi Pico.
-![Build](https://img.shields.io/badge/Passing-green)
+![Build](https://img.shields.io/badge/Build-Passing-green)
 
 ## Table of Contents
 - [Installation](#installation)
@@ -11,10 +11,10 @@ A simple library for managing character LCD's over the I2C bus on a Raspberry Pi
 - Single header file
 - Generic `print` method
     - Alternatives:
-    - `printFullRow()`  ![InDev](https://img.shields.io/badge/...-Started_Development-red) 40-byte bound print method. (For combination with display shift methods.)
-    - `printLong()`     ![Build](https://img.shields.io/badge/Experimental-yellow) Unbound-size print method to scroll over text longer than 40 bytes.
-    - `printFormat()`   ![InDev](https://img.shields.io/badge/...-Started_Development-red) Modifies character-alignment or appearance on display. Options in Documentation.
-    - `printAdv()`      ![InDev](https://img.shields.io/badge/...-Started_Development-red) Allows for writing anywhere in the display memory. Stops at the end of a given row.
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFullRow()` 40-byte bound print method. (For combination with display shift methods.)
+    - ![Build](https://img.shields.io/badge/Experimental-yellow) `printLong()` Unbound-size print method to scroll over text longer than 40 bytes.
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFormat()` Modifies character-alignment or appearance on display. Options in Documentation.
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printAdv()` Allows for writing anywhere in the display memory. Stops at the end of a given row.
 
 # Installation
 
@@ -38,7 +38,7 @@ For the time being, the generic `.print(string)` method is recommended for all c
 - If the string is longer than the row, but this method was used, it will passively scroll over the string with a mock sliding-window effect. This does not use the display's ability to move the entire display over the memory contents, so it can do this by individual row and exceed the display's interal limit of 40 bytes per row. Other future methods will explicity call that internal sliding display option, however. 
 
 # Documentation
-##Class Members
+## Class Members
 -`int TxBytesSent` is an explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at -1 explicitly and not using the macro. The error checking will attempt to print out an error message containing the exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output. 
 
 -`const uint8_t setEnableLow` is used to set the Enable pin to a low state after the data was sent with the pin in the high state. Enable in the low state indicates to the LCD that the transmission is complete and new data is ready to process. setEnableLow is set to 0b0000 1000 simply due to the strange behavior of the LCD backlight in combination with the i2c backpacks. Otherwise, this value can be left at 0x00, but after a pause in transmissions, the display backlight will darken. Also note that the i2c backpack forces communication into a 4-bit mode. This means each byte must be sent in two halves, and this value must be sent after each. So, a minimum of 4 transmissions to the display _per byte_ is required.
