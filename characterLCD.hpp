@@ -362,3 +362,4 @@ void DisplayControl::moveCursor(uint8_t row, uint8_t column){
     /// //     ||   //
     ///
     ///
+    ///
