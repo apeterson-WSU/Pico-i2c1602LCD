@@ -1,5 +1,6 @@
 # i2c-lcd pico 
 A simple library for managing character LCD's over the I2C bus on a Raspberry Pi Pico.
+![Build](https://img.shields.io/badge/Passing-green)
 
 ## Table of Contents
 - [Installation](#installation)
@@ -10,10 +11,39 @@ A simple library for managing character LCD's over the I2C bus on a Raspberry Pi
 - Single header file
 - Generic `print` method
     - Alternatives:
-    - `printFullRow()`  (In development) 40-byte bound print method. (For combination with display shift methods.)
+    - `printFullRow()`  ![InDev](https://img.shields.io/badge/...-Started_Development-red) 40-byte bound print method. (For combination with display shift methods.)
     - `printLong()`     ![Build](https://img.shields.io/badge/Experimental-yellow) Unbound-size print method to scroll over text longer than 40 bytes.
-    - `printFormat()`   (In development) Modifies character-alignment or appearance on display. Options in Documentation.
-    - `printAdv()`      (In development) Allows for writing anywhere in the display memory. Stops at the end of a given row.
-# Documentation
+    - `printFormat()`   ![InDev](https://img.shields.io/badge/...-Started_Development-red) Modifies character-alignment or appearance on display. Options in Documentation.
+    - `printAdv()`      ![InDev](https://img.shields.io/badge/...-Started_Development-red) Allows for writing anywhere in the display memory. Stops at the end of a given row.
 
-[C/C++ SDK](https://github.com/raspberrypi/pico-sdk)
+# Installation
+
+This project relies only on the Raspberry Pi Foundation's [C/C++ SDK](https://github.com/raspberrypi/pico-sdk). With the release of the 2.0.0 version, they also bundled all of their required toolchain components into the Visual Studio Code extension for the Pico. I strongly suggest you choose that route. It is still possible to build from the command line, even in Windows, but you will suffer for it. Use the extension and the debugger with your Pico. 
+
+Once you have the extension installed, you can:
+- Use an existing project or create a new one, and copy the header file into your project directoy and link with `include "characterLCD.hpp"`.
+- OR clone this repo, and attempt to import the directory into the VScode extension. I've personally had mixed results with this. It may or may not work, in the future I will narrow down exactly how to make this method work each time.
+
+Once the header is in your project, the last step will be adding:
+- `hardware_i2c`
+- `hardware_clocks`
+to your CmakeLists.txt file in the project directory, in the `target_link_libraries` section, just beneath the project executable target. 
+
+# Usage
+After you've linked the .hpp header file in the file containing your main method (Or wherever it'll be used) the object creation can be used with no arguments to accept the class defaults. You can view the defaults in the header file in the class declaration, and change them to match your hardware and wiring arrangement. Alternatively, you can use the overloaded constructor which takes all unique arguments required at once. Up to you, there is no difference between the objects post-creation. 
+
+For the time being, the generic `.print(string)` method is recommended for all cases. In my spare time in the future I will roll out some more specific methods like those listed above to make this a bit more useful. For now, `.print(string)` handles a few cases.
+- If the string is less than the row size, it will append white space in an internal buffer until it reaches row size, then pass the buffer off to be printed.
+- If the string is equal to the row size, it does nothing to it and just passes it on to be printed.
+- If the string is longer than the row, but this method was used, it will passively scroll over the string with a mock sliding-window effect. This does not use the display's ability to move the entire display over the memory contents, so it can do this by individual row and exceed the display's interal limit of 40 bytes per row. Other future methods will explicity call that internal sliding display option, however. 
+
+# Documentation
+##Class Members
+-`int TxBytesSent` is an explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at -1 explicitly and not using the macro. The error checking will attempt to print out an error message containing the exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output. 
+
+-`const uint8_t setEnableLow` is used to set the Enable pin to a low state after the data was sent with the pin in the high state. Enable in the low state indicates to the LCD that the transmission is complete and new data is ready to process. setEnableLow is set to 0b0000 1000 simply due to the strange behavior of the LCD backlight in combination with the i2c backpacks. Otherwise, this value can be left at 0x00, but after a pause in transmissions, the display backlight will darken. Also note that the i2c backpack forces communication into a 4-bit mode. This means each byte must be sent in two halves, and this value must be sent after each. So, a minimum of 4 transmissions to the display _per byte_ is required.
+
+-`displayMemoryIndex` contains, in order, the starting memory addresses of each row of a display, up to 4 rows. Note that this only works for displays up to 4 rows and 20 columns. For the displays with longer rows, such as the 4x40 display, the memory addressing is mirrored because it doesn't actually have enough for each character. I do not recommend using this library for the 4x40 displays for the time being, or you know what you're doing.   
+
+
+
