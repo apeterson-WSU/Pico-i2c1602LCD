@@ -294,20 +294,20 @@ void DisplayControl::flashLED(){
 
 void DisplayControl::print(string text){
     int strSize = text.size();
-    
+    const uint8_t displayWidth = this->columns; 
     // write the string to a buffer of fixed size to prevent bad cursor behavior 
-    if(strSize == 16){
+    if(strSize == displayWidth){
         for (int position{0}; position < 16; ++position){
             writeBuffer[position] = text[position];
         }
     }
-    else if(strSize < 16){ 
+    else if(strSize < displayWidth){ 
         int position = 0;
         for (; position < strSize; ++position){
             writeBuffer[position] = text[position];
         }
     // fill trailing empty positions with white space
-        while(position < 16){
+        while(position < displayWidth){
             writeBuffer[position] = ' '; 
             ++position;
         }
@@ -315,11 +315,11 @@ void DisplayControl::print(string text){
     else{   
     // string is longer than the display
     // iterate over string with small time delay after, then increment 1 index and repeat to scroll the text
-    uint8_t iter = strSize - 16;
+    uint8_t iter = strSize - displayWidth;
 
     for(uint8_t i = 0; i <= iter; ++i){
-        moveCursor(currRowWrite,0);
-        for(uint8_t j = 0; j < 16; ++j){
+        moveCursor(currRowWrite,0x00);
+        for(uint8_t j = 0; j < displayWidth; ++j){
             prepare_character(text[i+j]);
         }
         sleep_ms(500);
