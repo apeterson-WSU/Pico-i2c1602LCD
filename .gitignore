@@ -1,4 +1,6 @@
-CMakeLists.txt.user
+CMakeLists.txt.user 
+CMakeLists.txt
+copyOfCMakeLists.txt
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -10,3 +12,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+pico_sdk_import.cmake
+main.cpp
+
+# Directories
+/build
+/.vscode
