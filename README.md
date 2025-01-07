@@ -1,20 +1,17 @@
-# i2c-lcd pico 
+# i2c-lcd pico  ![Build](https://img.shields.io/badge/Build-Passing-green)
 A simple library for managing character LCD's over the I2C bus on a Raspberry Pi Pico.
-![Build](https://img.shields.io/badge/Build-Passing-green)
+
 
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Documentation](#documentation)
+- [Upcoming](#upcoming)
 
 # Features
 - Single header file
-- Generic `print` method
-    - Alternatives:
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFullRow()` 40-byte bound print method. (For combination with display shift methods.)
-    - ![Build](https://img.shields.io/badge/Experimental-yellow) `printLong()` Unbound-size print method to scroll over text longer than 40 bytes.
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFormat()` Modifies character-alignment or appearance on display. Options in Documentation.
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printAdv()` Allows for writing anywhere in the display memory. Stops at the end of a given row.
+- Generic `print(string)` method
+- Built to dynamically support display sizes
 
 # Installation
 
@@ -39,24 +36,42 @@ For the time being, the generic `.print(string)` method is recommended for all c
 
 # Documentation
 ## Class Members
--`int TxBytesSent` is an explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at -1 explicitly and not using the macro. The error checking will attempt to print out an error message containing the exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output. 
+### `int TxBytesSent` 
+An explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at `<1` (bytes sent) explicitly and not using the macro. The error check use `printf()` to log exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output.
 
--`const uint8_t setEnableLow` is used to set the Enable pin to a low state after the data was sent with the pin in the high state. Enable in the low state indicates to the LCD that the transmission is complete and new data is ready to process. setEnableLow is set to 0b0000 1000 simply due to the strange behavior of the LCD backlight in combination with the i2c backpacks. Otherwise, this value can be left at 0x00, but after a pause in transmissions, the display backlight will darken.
+### `const uint8_t setEnableLow` 
+Used to set the Enable pin to a low state after the data was sent with the pin in the high state. Enable in the low state indicates to the LCD that the transmission is complete and new data is ready to process. `setEnableLow` is set to 0b00001000 simply due to the behavior of the LCD backlight in combination with the i2c backpacks. Otherwise, this value could be left at 0x00, but after a pause in transmissions, the display backlight will darken.
 
--`displayMemoryIndex` contains, in order, the starting memory addresses of each row of a display, up to 4 rows. Note that this only works for displays up to 4 rows and 20 columns. For the displays with longer rows, such as the 4x40 display, the memory addressing is mirrored because it doesn't actually have enough for each character. I do not recommend using this library for the 4x40 displays for the time being, unless you know what you're doing.
+### `displayMemoryIndex` 
+This array contains, in order, the starting memory addresses of each row of a display, up to 4 rows. Note that this only works for displays up to 4 rows and 20 columns. For the displays with longer rows, such as the 4x40 display, the memory addressing is mirrored because it doesn't actually have enough space for each character. I do not recommend using this library for the 4x40 displays for the time being, unless you know what you're doing.
 
 
 ## Class Methods
 
-### Private Methods
--    void prepare_command(uint8_t data);
--    void prepare_character(uint8_t data);
--    inline void lcd_send_byte(const uint8_t mostNibble, const uint8_t leastNibble);
--    void init_display();
 
-### Public Methods
--    DisplayControl();
--    DisplayControl(i2c_inst* I2C, uint8_t SDA, uint8_t SCL, uint8_t hardware_address, uint8_t display_rows, uint8_t display_columns);
--    void print(string text);
--    void flashLED();
--    void moveCursor(uint8_t row, uint8_t column);
+### `void prepare_command(uint8_t data)`
+### `void prepare_character(uint8_t data);`
+### `inline void lcd_send_byte(const uint8_t mostNibble, const uint8_t leastNibble);`
+### `void init_display();`
+
+
+### `DisplayControl();`
+### `DisplayControl(i2c_inst* I2C, uint8_t SDA, uint8_t SCL, uint8_t hardware_address, uint8_t display_rows, uint8_t display_columns);`
+### `void print(string text);`
+### `void flashLED();`
+### `void moveCursor(uint8_t row, uint8_t column);`
+
+# Upcoming
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFullRow()` Writes the full 40-byte length of a row in memory.
+    - ![Build](https://img.shields.io/badge/Experimental-yellow) `printLong()` Unbound-size print method to scroll over text longer than 40 bytes.
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFormat()` Format text appearance on display with arguments.
+    - ![InDev](https://img.shields.io/badge/In_Development-red) `printAdv()` Allows for writing anywhere in the display memory.
+
+[//]: # (Feature table!)
+
+| Feature Name | Status | Description |
+| :-----------: | :-----------: | :-----------:
+| `printFullRow()` | ![InDev](https://img.shields.io/badge/In_Development-red) | Writes the full 40-byte length of a row in memory. |
+| `printLong()` | ![Build](https://img.shields.io/badge/Experimental-yellow) | Unbound-size print method to scroll over text longer than 40 bytes. |
+| `printFormat()` | ![InDev](https://img.shields.io/badge/In_Development-red) | Format text appearance, may end up as a few methods. |
+| `printAdv()` | ![InDev](https://img.shields.io/badge/In_Development-red) | Write anywhere in the display memory with start and stop bounds. |
