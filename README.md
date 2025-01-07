@@ -62,10 +62,6 @@ This array contains, in order, the starting memory addresses of each row of a di
 ### `void moveCursor(uint8_t row, uint8_t column);`
 
 # Upcoming
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFullRow()` Writes the full 40-byte length of a row in memory.
-    - ![Build](https://img.shields.io/badge/Experimental-yellow) `printLong()` Unbound-size print method to scroll over text longer than 40 bytes.
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printFormat()` Format text appearance on display with arguments.
-    - ![InDev](https://img.shields.io/badge/In_Development-red) `printAdv()` Allows for writing anywhere in the display memory.
 
 [//]: # (Feature table!)
 
