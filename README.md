@@ -18,12 +18,12 @@ A simple library for managing character LCD's over the I2C bus on a Raspberry Pi
 This project relies only on the Raspberry Pi Foundation's [C/C++ SDK](https://github.com/raspberrypi/pico-sdk). With the release of the 2.0.0 version, they also bundled all of their required toolchain components into the Visual Studio Code extension for the Pico. I strongly suggest you choose that route. It is still possible to build from the command line, even in Windows, but you will suffer for it. Use the extension and the debugger with your Pico. 
 
 Once you have the extension installed, you can:
-- Use an existing project or create a new one, and copy the header file into your project directory and link with `include "characterLCD.hpp"`.
+- Use an existing project or create a new one, and copy the header file into your project directory and link with `#include "characterLCD.hpp"`.
 - OR clone this repo, and attempt to import the directory into the VScode extension. I've personally had mixed results with this. It may or may not work, in the future I will narrow down exactly how to make this method work each time.
 
 Once the header is in your project, the last step will be adding:
 - `hardware_i2c`
-- `hardware_clocks`
+- `hardware_clocks` </br>
 to your CmakeLists.txt file in the project directory, in the `target_link_libraries` arguments, with the project executable target. 
 
 # Usage
@@ -36,13 +36,19 @@ For the time being, the generic `.print(string)` method is recommended for all c
 
 # Documentation
 ## Class Members
-### `int TxBytesSent` 
-An explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at `<1` (bytes sent) explicitly and not using the macro. The error check use `printf()` to log exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output.
 
-### `const uint8_t setEnableLow` 
+### `int TxBytesSent`
+
+An explicit integer type only to serve as a holder for the return value of the Pico SDK's `i2c_write_blocking()` method. Should this method ever fail to send the bytes it was given, it will return the macro "PICO_ERROR_GENERIC", or -1. The SDK could stand to be more clear on that, so for simplicity's sake, the value is checked at `<1` (bytes sent) explicitly and not using the macro. The error check use `printf()` to log the exact byte that failed to send, so if you experience problems, connect over the serial port at speed: 115200 and watch for output.
+
+
+### `const uint8_t setEnableLow `
+
 Used to set the Enable pin to a low state after the data was sent with the pin in the high state. Enable in the low state indicates to the LCD that the transmission is complete and new data is ready to process. `setEnableLow` is set to 0b00001000 simply due to the behavior of the LCD backlight in combination with the i2c backpacks. Otherwise, this value could be left at 0x00, but after a pause in transmissions, the display backlight will darken.
 
-### `displayMemoryIndex` 
+
+### `const uint8_t displayMemoryIndex`
+
 This array contains, in order, the starting memory addresses of each row of a display, up to 4 rows. Note that this only works for displays up to 4 rows and 20 columns. For the displays with longer rows, such as the 4x40 display, the memory addressing is mirrored because it doesn't actually have enough space for each character. I do not recommend using this library for the 4x40 displays for the time being, unless you know what you're doing.
 
 

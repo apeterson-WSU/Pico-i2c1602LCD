@@ -145,6 +145,8 @@ class DisplayControl {
     void print(string text);
     void flashLED();
     void moveCursor(uint8_t row, uint8_t column);
+    void shiftDisplayLeft();
+    void shiftDisplayRight();
 };
 
 
@@ -196,7 +198,7 @@ DisplayControl::DisplayControl(i2c_inst* I2C, uint8_t SDA, uint8_t SCL, uint8_t 
     init_display();
 }
 
-void DisplayControl::prepare_command(uint8_t data){
+void DisplayControl::prepare_command(uint8_t data){ // TODO test inline compiler directive here
     const uint8_t mostNibble = ((data & 0xF0) 
     | static_cast<uint8_t>(Backlight::Backlight))           // 0000 1000
     | static_cast<uint8_t>(Flags::Set_Enable_High);         // 0000 0100
